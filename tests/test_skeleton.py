@@ -9,14 +9,17 @@ def test_root_position():
     zeros = np.array([0, 0, 0])
     assert_allclose(sk.get_bone('root').position, zeros)
 
+
 def test_bone_direction():
     sk = Skeleton(skeleton_path)
     assert sk.get_bone('MiddleSpineJoint').direction[1] == 1
+
 
 def test_root_children():
     sk = Skeleton(skeleton_path)
     bone_iter = sk.get_bone('root')
     assert len(bone_iter.child) == 3
+
 
 def test_hierarchy():
     sk = Skeleton(skeleton_path)
@@ -31,6 +34,7 @@ def test_hierarchy():
                      'LeftClavicleJoint', 'LeftClavicleJoint_dum',
                      'UpperSpineJoint', 'MiddleSpineJoint',
                      'LowerSpineJoint', 'LowerSpineJoint_dum']
+
 
 def test_dump_str():
     sk = Skeleton(skeleton_path)

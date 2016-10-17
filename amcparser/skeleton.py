@@ -1,5 +1,9 @@
-import numpy as np
+from __future__ import print_function
+from asciitree import draw_tree
 import cgkit.asfamc
+import numpy as np
+
+from .math_utils import rotation_matrix_axis
 
 
 class Bone(object):
@@ -21,6 +25,9 @@ class Bone(object):
 
         self.position = None
         self.orientation = None
+
+        self.C = None
+        self.Cinv = None
 
     def set_parent(self, parent):
         self.parent = parent
@@ -48,10 +55,15 @@ class Skeleton(cgkit.asfamc.ASFReader):
     def onRoot(self, data):
         root_bone = self._add_bone('root')
         root_bone.is_root = True
+
         root_bone.position = list(map(float, data['position']))
         root_bone.position = np.array(root_bone.position) * self.scale
-        root_bone.orientation = np.array(data['orientation'])
-        root_bone.axis = np.array(data['orientation'])
+
+        root_bone.orientation = np.array(data['orientation'][0:3])
+        root_bone.axis = np.array(data['orientation'][0:3])
+        # Axis doesn't change; precalculate this.
+        root_bone.C, root_bone.Cinv = rotation_matrix_axis(root_bone.axis)
+
         self.root = root_bone
 
     def onBonedata(self, bones):
@@ -80,10 +92,11 @@ class Skeleton(cgkit.asfamc.ASFReader):
     def _set_bone_data(self, bone, bonedata):
         bone.length = float(bonedata['length'][0]) * self.scale
         bone.direction = np.array(list(map(float, bonedata['direction'])))
-
         bone.vector = bone.length * bone.direction
-
-        bone.axis = bonedata['axis']
+        bone.axis = np.array(list(map(float, bonedata['axis'][0:3])))
+        assert bone.axis.shape[0] == 3
+        # Axis doesn't change; precalculate this.
+        bone.C, bone.Cinv = rotation_matrix_axis(bone.axis)
 
     def _add_bone(self, bone_name):
         if bone_name not in self.bones:
@@ -91,30 +104,24 @@ class Skeleton(cgkit.asfamc.ASFReader):
         return self.bones[bone_name]
 
     def dump_str(self, bone, level=0):
-        print '\t' * level, bone
-        level += 1
-        for child in bone.child:
-            self.dump_str(child, level)
+        print('\n', draw_tree(bone, lambda x: x.child, str))
 
-    #def get_bones_until_root(self, bone_names):
-    #    """Handle the case with mocap files from multiple sources
-    #    where the requested bone has aliases like LeftWrist, lwrist, etc."""
-    #    bones = list()
-    #    bone_name = None
+    def iter_bones(self, bone_names):
+        """Generator to get all bones until root"""
+        bone_name = None
 
-    #    for b in bone_names:
-    #        if b in self.bones:
-    #            bone_name = b
+        # Check if candidate bone exists
+        for b in bone_names:
+            if b in self.bones:
+                bone_name = b
 
-    #    if not bone_name:
-    #        raise ValueError('bone %s not found' % bone_name)
+        if not bone_name:
+            raise ValueError('bone %s not found' % bone_name)
 
-    #    my_bone = self.bones[bone_name]
-    #    while my_bone is not None:
-    #        bones.append(my_bone)
-    #        my_bone = my_bone.parent
-
-    #    return bones, bone_name
+        cur_bone = self.bones[bone_name]
+        while cur_bone:
+            yield cur_bone
+            cur_bone = cur_bone.parent
 
     def get_bone(self, bone_name):
         return self.bones[bone_name]
