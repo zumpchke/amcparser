@@ -1,5 +1,5 @@
 from __future__ import print_function
-from asciitree import draw_tree
+import asciitree
 import cgkit.asfamc
 import numpy as np
 
@@ -28,6 +28,8 @@ class Bone(object):
 
         self.C = None
         self.Cinv = None
+
+        self.xyz_data = None
 
     def set_parent(self, parent):
         self.parent = parent
@@ -104,11 +106,16 @@ class Skeleton(cgkit.asfamc.ASFReader):
         return self.bones[bone_name]
 
     def dump_str(self, bone, level=0):
-        print('\n', draw_tree(bone, lambda x: x.child, str))
+        """Dump graph as a string."""
+        print('\n', asciitree.draw_tree(bone, lambda x: x.child, str))
+
 
     def iter_bones(self, bone_names):
         """Generator to get all bones until root"""
         bone_name = None
+
+        if not hasattr(bone_names, '__iter__'):
+            bone_names = [bone_names]
 
         # Check if candidate bone exists
         for b in bone_names:

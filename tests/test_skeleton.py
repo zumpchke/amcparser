@@ -20,6 +20,15 @@ def test_root_children():
     bone_iter = sk.get_bone('root')
     assert len(bone_iter.child) == 3
 
+def test_iter_bones():
+    sk = Skeleton(skeleton_path)
+    bone_iter = sk.iter_bones('root')
+    bones = [b for b in bone_iter]
+    assert len(bones) == 1
+    bone_iter = sk.iter_bones('MiddleSpineJoint')
+    bones = [b for b in bone_iter]
+    assert len(bones) == 4
+
 
 def test_hierarchy():
     sk = Skeleton(skeleton_path)

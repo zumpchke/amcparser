@@ -1,4 +1,4 @@
-from . import Skeleton, SkelMotion
+from __future__ import print_function
 import visual
 from visual import *
 
@@ -7,6 +7,7 @@ FLOOR_POS = (0, -0.001, 0)
 FLOOR_LENGTH = 4
 FLOOR_HEIGHT = 0.01
 FLOOR_WIDTH = 4
+FLOOR_COLOR = visual.color.white
 
 
 class Axes(object):
@@ -28,6 +29,7 @@ class Axes(object):
 
 
 class Pose(object):
+    """Animate the motion data."""
     bone_radius = 0.05
     sphere_radius = 0.03
     cyl_radius = 0.01
@@ -35,22 +37,49 @@ class Pose(object):
     def __init__(self, skeleton, motion, scene=None):
         self.skeleton = skeleton
         self.motion = motion
+        self.bone_data = dict()
+        self.framerate = None
+        self.title = 'amcparser %s' % (self.motion.filename)
 
         if not scene:
-            self.scene = display(title='amcparser', width=640, height=480)
+            self.scene = display(title=self.title, width=640, height=480)
         else:
             self.scene = scene
 
+        self._frameno = label(pos=(-2, -2, 0), text='0')
         self._create_floor()
         self._axes = Axes(1.0)
 
     def _create_floor(self):
-        """
-        Create floor
-        """
         self.floor = visual.box(pos=FLOOR_POS, length=FLOOR_LENGTH,
                                 height=FLOOR_HEIGHT, width=FLOOR_WIDTH,
-                                color=visual.color.white)
+                                color=FLOOR_COLOR)
 
-    def plot(self):
-        pass
+    def _handle_dfs(self, bone, parent, frame):
+        # Calculate new direction and position
+        direction = (bone.xyz_data[frame, :] -
+                     parent.xyz_data[frame, :]).tolist()
+        pos = parent.xyz_data[frame, :].tolist()
+        if bone.name in self.bone_data:
+            # Retrieve and update objects
+            cyl, s = self.bone_data[bone.name]
+            cyl.pos = pos
+            cyl.axis = direction
+            s.pos = bone.xyz_data[frame, :].tolist()
+        else:
+            # Create and save objects.
+            cyl = cylinder(pos=pos, axis=direction,
+                           radius=Pose.cyl_radius)
+
+            s = sphere(pos=bone.xyz_data[frame, :].tolist(),
+                       radius=Pose.sphere_radius)
+            self.bone_data[bone.name] = (cyl, s)
+
+    def _end_frame(self, frame):
+        self._frameno.text = str(frame)
+        rate(1.0 / self.motion.interval)
+
+    def plot(self, start, end):
+        self.motion.register_dfs_cb(self._handle_dfs)
+        self.motion.register_dfs_end(self._end_frame)
+        self.motion.get_positions(self.skeleton.root, start, end)
