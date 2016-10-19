@@ -10,25 +10,25 @@ FLOOR_POS = (0, -0.001, 0)
 FLOOR_LENGTH = 4
 FLOOR_HEIGHT = 0.01
 FLOOR_WIDTH = 4
-FLOOR_COLOR = visual.color.white
+FLOOR_COLOR = visual.color.orange
 
 
 class Axes(object):
     """A set of orthogonal arrows to represent a coordinate system."""
     def __init__(self, scale):
+        """
+        TODO: Remove magic constants.
+        """
         self.scale = scale
-        self.pos = (0, 0.05, 0)
+        self.pos = (0, 0, 0)
         self.obj = box(pos=self.pos, length=0.1, width=0.05, height=0.05,
                        color=color.orange)
-        self.x = arrow(pos=self.pos, axis=(0.5, 0, 0), shaftwidth=0.01,
+        self.x = arrow(pos=self.pos, axis=(0.5, 0, 0), shaftwidth=0.05,
                        color=color.red)
-        self.x_label = label(pos=(0.6, 0, 0), text='X', height=8)
-        self.y = arrow(pos=self.pos, axis=(0, 0.5, 0), shaftwidth=0.01,
+        self.y = arrow(pos=self.pos, axis=(0, 0.5, 0), shaftwidth=0.05,
                        color=color.green)
-        self.y_label = label(pos=(0.0, 0.6, 0), text='Y', height=8)
-        self.z = arrow(pos=self.pos, axis=(0, 0, 0.5), shaftwidth=0.01,
+        self.z = arrow(pos=self.pos, axis=(0, 0, 0.5), shaftwidth=0.05,
                        color=color.blue)
-        self.z_label = label(pos=(0.0, 0.0, 0.6), text='Z', height=8)
 
 
 class Pose(object):
@@ -45,7 +45,8 @@ class Pose(object):
         self.title = 'amcparser %s' % (self.motion.filename)
 
         if not scene:
-            self.scene = display(title=self.title, width=640, height=480)
+            self.scene = display(title=self.title, width=640, height=480,
+                                 center=(0, 0, 0), forward=(-2, -2, -1))
         else:
             self.scene = scene
 
@@ -53,7 +54,7 @@ class Pose(object):
         self.gif_frames = list()
 
 
-        self._frameno = label(pos=(-2, -2, 0), text='0')
+        self._frameno = label(pos=(-6, -0, 0), text='0')
         self._create_floor()
         self._axes = Axes(1.0)
 
