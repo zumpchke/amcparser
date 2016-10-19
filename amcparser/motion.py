@@ -82,10 +82,11 @@ class SkelMotion(cgkit.asfamc.AMCReader):
         self.dfs_cb = dfs_cb
 
     def register_dfs_end(self, dfs_end):
-        """Called after a traversal of the skeleton graph for a single frame."""
+        """Called after a traversal of the skeleton graph for a single frame.
+        """
         self.dfs_end = dfs_end
 
-    def get_positions(self, bone, start, end):
+    def traverse(self, bone, start, end):
         if end < 0:
             end = self.size + end + 1
 

@@ -23,7 +23,6 @@ def rotation_matrix_axis(C_values):
     Cinv = np.linalg.inv(C)
     return C, Cinv
 
-
 def rotation_matrix(bone, tx, ty, tz):
     # Construct rotation matrix M
     tx = np.deg2rad(tx)

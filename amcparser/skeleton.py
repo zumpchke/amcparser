@@ -109,7 +109,6 @@ class Skeleton(cgkit.asfamc.ASFReader):
         """Dump graph as a string."""
         print('\n', asciitree.draw_tree(bone, lambda x: x.child, str))
 
-
     def iter_bones(self, bone_names):
         """Generator to get all bones until root"""
         bone_name = None

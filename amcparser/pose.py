@@ -1,4 +1,7 @@
 from __future__ import print_function
+import os
+import sh
+import tempfile
 import visual
 from visual import *
 
@@ -46,6 +49,10 @@ class Pose(object):
         else:
             self.scene = scene
 
+        self.window_id = None
+        self.gif_frames = list()
+
+
         self._frameno = label(pos=(-2, -2, 0), text='0')
         self._create_floor()
         self._axes = Axes(1.0)
@@ -79,7 +86,33 @@ class Pose(object):
         self._frameno.text = str(frame)
         rate(1.0 / self.motion.interval)
 
+    def _end_frame_gif(self, frame):
+        self._end_frame(frame)
+        if not frame % 5:
+            return
+
+        if not self.window_id:
+            self.window_id = sh.grep(sh.xwininfo('-root', '-tree'),
+                                     self.title).strip().split(' ')[0]
+
+        cmd = sh.Command('import')
+        # TODO: Might be faster to use a ramdisk
+        tmp = tempfile.NamedTemporaryFile(suffix='.gif')
+        cmd('-window', self.window_id, tmp.name)
+        self.gif_frames.append(tmp)
+
+    def to_gif(self, filename, start, end):
+        """Extremely slow method to go from vpython -> GIF."""
+        self.motion.register_dfs_cb(self._handle_dfs)
+        self.motion.register_dfs_end(self._end_frame_gif)
+        self.motion.traverse(self.skeleton.root, start, end)
+        commands = ['-delay', '1x80', '-loop', '0']
+        commands.extend(map(lambda x: x.name, self.gif_frames))
+        commands.append(filename)
+        sh.convert(commands)
+        self.gif_frames = []
+
     def plot(self, start, end):
         self.motion.register_dfs_cb(self._handle_dfs)
         self.motion.register_dfs_end(self._end_frame)
-        self.motion.get_positions(self.skeleton.root, start, end)
+        self.motion.traverse(self.skeleton.root, start, end)
