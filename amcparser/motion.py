@@ -52,8 +52,11 @@ class SkelMotion(cgkit.asfamc.AMCReader):
             else:
                 start = 0
             bone_rotation = np.array(self.data[bone.name][frame][start:])
-            L = rotation_matrix(bone, bone_rotation[0], bone_rotation[1],
-                                bone_rotation[2])
+            try:
+                L = rotation_matrix(bone, bone_rotation[0], bone_rotation[1],
+                                    bone_rotation[2])
+            except:
+                L = rotation_matrix(bone, bone_rotation[0], 0, 0)
         else:
             # Handle dummy bones which contain don't change angle
             # in their local coordinate system per frame.
