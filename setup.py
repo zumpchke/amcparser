@@ -5,6 +5,6 @@ setup(name='amcparser',
       author='Vanush Vaswani',
       author_email='vanush@gmail.com',
       packages=find_packages(),
-      install_requires=['numpy', 'cgkit', 'asciitree', 'tqdm'],
+      install_requires=['numpy', 'cgkit', 'asciitree', 'tqdm', 'sh'],
       entry_points={'console_scripts': ['amcparser = amcparser.driver:main']},
       )
