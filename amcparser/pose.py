@@ -3,7 +3,7 @@ import os
 import sh
 import tempfile
 import visual
-from visual import *
+import visual_common
 
 
 FLOOR_POS = (0, -0.001, 0)
@@ -21,14 +21,14 @@ class Axes(object):
         """
         self.scale = scale
         self.pos = (0, 0, 0)
-        self.obj = box(pos=self.pos, length=0.1, width=0.05, height=0.05,
-                       color=color.orange)
-        self.x = arrow(pos=self.pos, axis=(0.5, 0, 0), shaftwidth=0.05,
-                       color=color.red)
-        self.y = arrow(pos=self.pos, axis=(0, 0.5, 0), shaftwidth=0.05,
-                       color=color.green)
-        self.z = arrow(pos=self.pos, axis=(0, 0, 0.5), shaftwidth=0.05,
-                       color=color.blue)
+        self.obj = visual.box(pos=self.pos, length=0.1, width=0.05, height=0.05,
+                       color=visual.color.orange)
+        self.x = visual.arrow(pos=self.pos, axis=(0.5, 0, 0), shaftwidth=0.05,
+                       color=visual.color.red)
+        self.y = visual.arrow(pos=self.pos, axis=(0, 0.5, 0), shaftwidth=0.05,
+                       color=visual.color.green)
+        self.z = visual.arrow(pos=self.pos, axis=(0, 0, 0.5), shaftwidth=0.05,
+                       color=visual.color.blue)
 
 
 class Pose(object):
@@ -45,7 +45,8 @@ class Pose(object):
         self.title = 'amcparser %s' % (self.motion.filename)
 
         if not scene:
-            self.scene = display(title=self.title, width=640, height=480,
+            # XXX: Where is this 'display' function
+            self.scene = visual_common.create_display.display(title=self.title, width=640, height=480,
                                  center=(0, 0, 0), forward=(-2, -2, -1))
         else:
             self.scene = scene
@@ -54,7 +55,7 @@ class Pose(object):
         self.gif_frames = list()
 
 
-        self._frameno = label(pos=(-6, -0, 0), text='0')
+        self._frameno = visual.label(pos=(-6, -0, 0), text='0')
         self._create_floor()
         self._axes = Axes(1.0)
 
@@ -76,16 +77,16 @@ class Pose(object):
             s.pos = bone.xyz_data[frame, :].tolist()
         else:
             # Create and save objects.
-            cyl = cylinder(pos=pos, axis=direction,
+            cyl = visual.cylinder(pos=pos, axis=direction,
                            radius=Pose.cyl_radius)
 
-            s = sphere(pos=bone.xyz_data[frame, :].tolist(),
+            s = visual.sphere(pos=bone.xyz_data[frame, :].tolist(),
                        radius=Pose.sphere_radius)
             self.bone_data[bone.name] = (cyl, s)
 
     def _end_frame(self, frame):
         self._frameno.text = str(frame)
-        rate(1.0 / self.motion.interval)
+        visual.rate(1.0 / self.motion.interval)
 
     def _end_frame_gif(self, frame):
         self._end_frame(frame)
