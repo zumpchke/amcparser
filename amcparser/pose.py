@@ -13,7 +13,6 @@ FLOOR_WIDTH = 4
 FLOOR_COLOR = visual.color.orange
 
 
-
 class Axes(object):
     """A set of orthogonal arrows to represent a coordinate system."""
     def __init__(self, xdir, ydir, zdir, scale, pos=(0, 0, 0), width=0.05):
@@ -57,7 +56,6 @@ class Pose(object):
         self.title = 'amcparser %s' % (self.motion.filename)
 
         if not scene:
-            # XXX: Where is this 'display' function
             self.scene = visual_common.create_display.display(title=self.title, width=640, height=480,
                                  center=(0, 0, 0), forward=(-2, -2, -1), background=(0, 1, 0.5))
         else:
