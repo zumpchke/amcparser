@@ -59,7 +59,7 @@ class Pose(object):
         if not scene:
             # XXX: Where is this 'display' function
             self.scene = visual_common.create_display.display(title=self.title, width=640, height=480,
-                                 center=(0, 0, 0), forward=(-2, -2, -1))
+                                 center=(0, 0, 0), forward=(-2, -2, -1), background=(0, 1, 0.5))
         else:
             self.scene = scene
 
