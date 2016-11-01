@@ -73,7 +73,7 @@ class SkelMotion(cgkit.asfamc.AMCReader):
             bone.xyz_data[frame, :] = (parent.xyz_data[frame, :] +
                                        (bone.vector * stack[-1]))
             if self.dfs_cb:
-                self.dfs_cb(bone, parent, frame)
+                self.dfs_cb(bone, parent, frame, stack)
 
         for i in bone.child:
             self._dfs(i, frame, parent=bone, stack=stack)
@@ -90,13 +90,15 @@ class SkelMotion(cgkit.asfamc.AMCReader):
         self.dfs_end = dfs_end
 
     def traverse(self, bone, start, end):
+        """For each frame traverse the graph and perform calculations."""
         if end < 0:
             end = self.size + end + 1
 
         if start < 0 or end < start:
             raise ValueError('incorrect params to function')
 
+        stack = list()
         for i in tqdm(range(start, end)):
-            self._dfs(self.skeleton.root, i, stack=list())
+            self._dfs(self.skeleton.root, i, stack=stack)
             if self.dfs_end:
                 self.dfs_end(i)
