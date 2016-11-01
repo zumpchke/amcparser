@@ -13,20 +13,21 @@ FLOOR_WIDTH = 4
 FLOOR_COLOR = visual.color.orange
 
 
+
 class Axes(object):
     """A set of orthogonal arrows to represent a coordinate system."""
-    def __init__(self, xdir, ydir, zdir, scale, pos=(0, 0, 0)):
+    def __init__(self, xdir, ydir, zdir, scale, pos=(0, 0, 0), width=0.05):
         """
         TODO: Remove magic constants.
         """
         self.scale = scale
         #self.obj = visual.box(pos=self.pos, length=0.1, width=0.05, height=0.05,
         #               color=visual.color.orange)
-        self.x = visual.arrow(pos=pos, shaftwidth=0.01,
+        self.x = visual.arrow(pos=pos, shaftwidth=width,
                        color=visual.color.red)
-        self.y = visual.arrow(pos=pos, shaftwidth=0.01,
+        self.y = visual.arrow(pos=pos, shaftwidth=width,
                        color=visual.color.green)
-        self.z = visual.arrow(pos=pos, shaftwidth=0.01,
+        self.z = visual.arrow(pos=pos, shaftwidth=width,
                        color=visual.color.blue)
         self.update(xdir, ydir, zdir)
 
@@ -101,7 +102,7 @@ class Pose(object):
             s = visual.sphere(pos=bone.xyz_data[frame, :].tolist(),
                        radius=Pose.sphere_radius)
 
-            axes = Axes(xdir, ydir, zdir, 0.3, pos=pos)
+            axes = Axes(xdir, ydir, zdir, 0.3, pos=pos, width=0.01)
             self.bone_data[bone.name] = (cyl, s, axes)
 
     def _handle_end_frame(self, frame):
@@ -118,13 +119,16 @@ class Pose(object):
                                      self.title).strip().split(' ')[0]
 
         cmd = sh.Command('import')
-        # TODO: Might be faster to use a ramdisk
+        # TODO: Might be faster to use a RAMdisk
         tmp = tempfile.NamedTemporaryFile(suffix='.gif')
         cmd('-window', self.window_id, tmp.name)
         self.gif_frames.append(tmp)
 
     def to_gif(self, filename, start, end):
-        """Extremely slow method to go from vpython -> GIF."""
+        """Extremely slow method to go from vpython -> GIF.
+
+        Linux only... ?
+        """
         self.motion.register_dfs_cb(self._handle_dfs)
         self.motion.register_dfs_end(self._handle_end_frame_gif)
         self.motion.traverse(self.skeleton.root, start, end)
@@ -134,7 +138,9 @@ class Pose(object):
         sh.convert(commands)
         self.gif_frames = []
 
-    def plot(self, start, end):
+    def plot(self, start, end, loop=False):
         self.motion.register_dfs_cb(self._handle_dfs)
         self.motion.register_dfs_end(self._handle_end_frame)
         self.motion.traverse(self.skeleton.root, start, end)
+        if loop:
+            return self.plot(start, end, loop)

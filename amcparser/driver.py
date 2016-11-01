@@ -6,7 +6,7 @@ def plot(args):
     sk = Skeleton(args.skeleton, scale=float(args.scale))
     skm = SkelMotion(sk, args.motion, (1.0 / float(args.framerate)))
     p = Pose(sk, skm)
-    p.plot(0, -1)
+    p.plot(0, -1, loop=args.loop)
 
 
 def main():
@@ -17,6 +17,7 @@ def main():
                         help='Path to *.amc file')
     parser.add_argument('--scale', default=1.0, required=False)
     parser.add_argument('--framerate', default=120.0)
+    parser.add_argument('--loop', action='store_true', default=False)
     args = parser.parse_args()
 
     plot(args)
