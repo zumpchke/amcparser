@@ -6,11 +6,13 @@ import visual
 import visual_common
 
 
+CHAR_SPACE = ' '
 FLOOR_POS = (0, -0.001, 0)
 FLOOR_LENGTH = 4
 FLOOR_HEIGHT = 0.01
 FLOOR_WIDTH = 4
 FLOOR_COLOR = visual.color.orange
+
 
 
 class Axes(object):
@@ -57,7 +59,7 @@ class Pose(object):
 
         if not scene:
             self.scene = visual_common.create_display.display(title=self.title, width=640, height=480,
-                                 center=(0, 0, 0), forward=(-2, -2, -1), background=(0, 1, 0.5))
+                                 center=(0, 0, 0), forward=(-2, -2, -1))
         else:
             self.scene = scene
 
@@ -105,7 +107,20 @@ class Pose(object):
 
     def _handle_end_frame(self, frame):
         self._frameno.text = str(frame)
+        self._handle_pause()
         visual.rate(1.0 / self.motion.interval)
+
+    def _handle_pause(self):
+        paused = False
+        if self.scene.kb.keys or paused:
+            while True:
+                visual.sleep(0.1)
+                s = self.scene.kb.getkey()
+                if s == CHAR_SPACE and not paused:
+                    paused = True
+                elif s == CHAR_SPACE and paused:
+                    paused = False
+                    break
 
     def _handle_end_frame_gif(self, frame):
         self._end_frame(frame)
