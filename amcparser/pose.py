@@ -31,6 +31,7 @@ class Axes(object):
         self.z = visual.arrow(pos=pos, shaftwidth=width,
                        color=visual.color.blue)
         self.update(xdir, ydir, zdir)
+        self.arrow = visual.arrow(pos=(0, 0, 0), axis=(1, 1, 1), color=visual.color.cyan, shaftwidth=0.01)
 
     def update(self, xdir, ydir, zdir, pos=(0, 0, 0)):
         assert len(xdir) == 3
@@ -65,6 +66,8 @@ class Pose(object):
 
         self.window_id = None
         self.gif_frames = list()
+        self.arrow = visual.arrow(pos=(0, 0, 0), axis=(1, 1, 1), color=visual.color.cyan, shaftwidth=0.01)
+        self.test = visual.box(pos=(0, 0, 0), color=visual.color.magenta, length=0.05, width=0.05, height=0.05)
 
 
         self._frameno = visual.label(pos=(-6, -0, 0), text='0')
@@ -93,16 +96,32 @@ class Pose(object):
             cyl.pos = pos
             cyl.axis = direction
             s.pos = bone.xyz_data[frame, :].tolist()
-            ax.update(xdir, ydir, zdir, pos)
+
+            if bone.name == 'LeftHipJoint':
+                ax.update(xdir, ydir, zdir, pos)
+                self.arrow.pos = pos
+                xform = np.array([1, 1, 1]) * transform_stack[-1]
+                xform = xform[0].tolist()
+                self.arrow.axis = (xform[0][0], xform[0][1], xform[0][2])
+
+            if bone.name == 'LeftHipJoint':
+                xform = (np.array([0.05 ,-0.05 , 0.05]) * transform_stack[-1])[0].tolist()
+                self.test.pos = (pos[0] + xform[0][0], pos[1] + xform[0][1], pos[2] + xform[0][2])
         else:
             # Create and save objects.
+
+            color = visual.color.white
             cyl = visual.cylinder(pos=pos, axis=direction,
                            radius=Pose.cyl_radius)
 
             s = visual.sphere(pos=bone.xyz_data[frame, :].tolist(),
-                       radius=Pose.sphere_radius)
+                       radius=Pose.sphere_radius, color=color)
 
-            axes = Axes(xdir, ydir, zdir, 0.3, pos=pos, width=0.01)
+            if bone.name == 'LeftHipJoint':
+                axes = Axes(xdir, ydir, zdir, 0.3, pos=pos, width=0.01)
+            else:
+                axes = None
+
             self.bone_data[bone.name] = (cyl, s, axes)
 
     def _handle_end_frame(self, frame):

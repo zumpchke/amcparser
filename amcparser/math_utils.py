@@ -2,7 +2,6 @@ import numpy as np
 
 
 def rotation_matrix_axis(C_values):
-    # Change coordinate system through matrix C
     rx = np.deg2rad(float(C_values[0]))
     ry = np.deg2rad(float(C_values[1]))
     rz = np.deg2rad(float(C_values[2]))
@@ -24,7 +23,7 @@ def rotation_matrix_axis(C_values):
     return C, Cinv
 
 def rotation_matrix(bone, tx, ty, tz):
-    # Construct rotation matrix M
+    """Construct local transformation matrix given motion data"""
     tx = np.deg2rad(tx)
     ty = np.deg2rad(ty)
     tz = np.deg2rad(tz)
